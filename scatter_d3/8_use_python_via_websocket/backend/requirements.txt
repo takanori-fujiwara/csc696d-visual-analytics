@@ -1,0 +1,5 @@
+numpy
+pandas
+networkx
+websockets
+uvloop ; sys_platform == "linux" or sys_platform == "darwin"
