@@ -2,7 +2,7 @@ import * as d3 from "https://cdn.skypack.dev/d3@7";
 import { scatterplot } from "./scatterplot.js";
 import { lassoSelection } from "./lasso.js";
 
-const fileName = "wine_result.csv";
+const fileName = "mtcars.csv";
 const defaultColor = "#aa0000";
 const unselectedColor = "#aaaaaa";
 
@@ -17,8 +17,8 @@ const model = {
 const prepareScatter = (data) => {
   const scatter = scatterplot(data, {
     svgId: "scatterplot",
-    x: (d) => d.tsne_1,
-    y: (d) => d.tsne_2,
+    x: (d) => d.mpg,
+    y: (d) => d.hp,
     c: defaultColor,
     width: d3.select("#view_b").node().getBoundingClientRect().width,
     height: d3.select("#view_b").node().getBoundingClientRect().height,
