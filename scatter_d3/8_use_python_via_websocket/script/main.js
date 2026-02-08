@@ -2,7 +2,7 @@ import * as d3 from "https://cdn.skypack.dev/d3@7";
 import { scatterplot } from "./scatterplot.js";
 import { lassoSelection } from "./lasso.js";
 
-const fileName = "mtcars.csv";
+const fileName = "wine_result.csv";
 const defaultColor = "#aa0000";
 const unselectedColor = "#aaaaaa";
 
@@ -14,12 +14,18 @@ const model = {
   network: undefined,
 };
 
+const labelToColor = {
+  0: "#1f77b4",
+  1: "#ff7f0e",
+  2: "#2ca02c",
+};
+
 const prepareScatter = (data) => {
   const scatter = scatterplot(data, {
     svgId: "scatterplot",
-    x: (d) => d.mpg,
-    y: (d) => d.hp,
-    c: defaultColor,
+    x: (d) => d.tsne_1,
+    y: (d) => d.tsne_2,
+    c: (d) => labelToColor[d.label],
     width: d3.select("#view_b").node().getBoundingClientRect().width,
     height: d3.select("#view_b").node().getBoundingClientRect().height,
   });
@@ -28,11 +34,11 @@ const prepareScatter = (data) => {
   return scatter;
 };
 
-const prepareNetwork = (nodePositions, links) => {
+const prepareNetwork = (nodePositions, links, colors) => {
   const network = scatterplot(nodePositions, {
     svgId: "network",
     links: links,
-    c: defaultColor,
+    c: colors,
     width: d3.select("#view_c").node().getBoundingClientRect().width,
     height: d3.select("#view_c").node().getBoundingClientRect().height,
     showXAxis: false,
@@ -45,17 +51,17 @@ const prepareNetwork = (nodePositions, links) => {
 
 const prepareLasso = (scatter, network) => {
   const lasso = lassoSelection();
-
+  const colors = model.data.map((d) => labelToColor[d.label]);
   lasso.on("end", () => {
     const selected = lasso.selected(); // get list of selected/unselected in boolean array
 
     if (Math.max(...selected) === 0) {
       // nothing selected by lasso
-      scatter.update(defaultColor);
-      network.update(defaultColor);
+      scatter.update(colors);
+      network.update(colors);
     } else {
-      const pointColors = selected.map((s) =>
-        s ? defaultColor : unselectedColor,
+      const pointColors = selected.map((s, i) =>
+        s ? colors[i] : unselectedColor,
       );
       scatter.update(pointColors);
       network.update(pointColors);
@@ -119,7 +125,11 @@ ws.onmessage = (event) => {
     );
   } else if (action === messageActions.passNetworkLayout) {
     const positions = content;
-    model.network = prepareNetwork(positions, model.links);
+    model.network = prepareNetwork(
+      positions,
+      model.links,
+      model.data.map((d) => labelToColor[d.label]),
+    );
     prepareLasso(model.scatter, model.network);
   }
 };
