@@ -27,7 +27,37 @@ for i in range(len(X)):
 
 # Color map for classes
 color_map = {0: "#1f77b4", 1: "#ff7f0e", 2: "#2ca02c"}
-point_colors = [color_map[c] for c in y]
+
+# Precompute original row indices per class (curve)
+# class_indices[i] gives the array of original row indices for class i
+class_indices = [np.where(y == cls)[0] for cls in range(len(class_names))]
+
+def make_scatter_figure():
+    fig = go.Figure()
+    for cls_idx, cls_name in enumerate(class_names):
+        mask = y == cls_idx
+        fig.add_trace(
+            go.Scatter(
+                x=X_tsne[mask, 0],
+                y=X_tsne[mask, 1],
+                mode="markers",
+                marker=dict(size=8, color=color_map[cls_idx], opacity=0.8),
+                name=cls_name,
+                text=[hover_texts[i] for i in range(len(y)) if y[i] == cls_idx],
+                hoverinfo="text",
+                selected=dict(marker=dict(opacity=1.0)),
+                unselected=dict(marker=dict(opacity=0.3)),
+            )
+        )
+    fig.update_layout(
+        dragmode="lasso",
+        xaxis=dict(title="t-SNE 1"),
+        yaxis=dict(title="t-SNE 2"),
+        legend=dict(title="Class"),
+        margin=dict(l=40, r=20, t=20, b=40),
+    )
+    return fig
+
 
 # --- App layout ---
 app = Dash(__name__)
@@ -48,7 +78,7 @@ app.layout = html.Div(
                             "Hover for details. Use lasso or box select to update the bar chart.",
                             style={"fontSize": "13px", "color": "#666"},
                         ),
-                        dcc.Graph(id="scatter", style={"height": "600px"}),
+                        dcc.Graph(id="scatter", figure=make_scatter_figure(), style={"height": "600px"}),
                     ],
                 ),
                 # Bar chart view
@@ -69,35 +99,6 @@ app.layout = html.Div(
 )
 
 
-def make_scatter_figure():
-    fig = go.Figure()
-    for cls_idx, cls_name in enumerate(class_names):
-        mask = y == cls_idx
-        fig.add_trace(
-            go.Scatter(
-                x=X_tsne[mask, 0],
-                y=X_tsne[mask, 1],
-                mode="markers",
-                marker=dict(size=8, color=color_map[cls_idx], opacity=0.8),
-                name=cls_name,
-                text=[hover_texts[i] for i in range(len(y)) if y[i] == cls_idx],
-                hoverinfo="text",
-                # Store original indices as customdata for selection callback
-                customdata=np.where(mask)[0],
-                selected=dict(marker=dict(opacity=1.0)),
-                unselected=dict(marker=dict(opacity=0.3)),
-            )
-        )
-    fig.update_layout(
-        dragmode="lasso",
-        xaxis=dict(title="t-SNE 1"),
-        yaxis=dict(title="t-SNE 2"),
-        legend=dict(title="Class"),
-        margin=dict(l=40, r=20, t=20, b=40),
-    )
-    return fig
-
-
 @callback(
     Output("bar-chart", "figure"),
     Output("selection-info", "children"),
@@ -109,18 +110,16 @@ def update_bar_chart(selected_data):
         means = X.mean(axis=0)
         info_text = "Showing overall mean (no selection). Select points in the scatterplot."
     else:
-        # Collect original row indices from all selected points
+        # Map (curveNumber, pointIndex) back to original row indices
+        # Each curve corresponds to a class; pointIndex is the index within that class
         indices = []
         for pt in selected_data["points"]:
-            idx = pt.get("customdata")
-            if idx is not None:
-                indices.append(int(idx))
-        if len(indices) == 0:
-            means = X.mean(axis=0)
-            info_text = "Showing overall mean (no valid selection)."
-        else:
-            means = X[indices].mean(axis=0)
-            info_text = f"Showing mean of {len(indices)} selected point(s)."
+            curve = pt["curveNumber"]
+            point_idx = pt["pointIndex"]
+            # class_indices[curve] holds the original row indices for that class
+            indices.append(int(class_indices[curve][point_idx]))
+        means = X[indices].mean(axis=0)
+        info_text = f"Showing mean of {len(indices)} selected point(s)."
 
     fig = go.Figure(
         go.Bar(
@@ -136,9 +135,6 @@ def update_bar_chart(selected_data):
     )
     return fig, info_text
 
-
-# Set the scatter figure directly (no callback needed — it's static)
-app.layout.children[1].children[0].children[2].figure = make_scatter_figure()
 
 if __name__ == "__main__":
     app.run(debug=True)

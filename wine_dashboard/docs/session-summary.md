@@ -55,6 +55,21 @@ Build an interactive visual analysis interface using Dash (Plotly Dash) to explo
 - Confirmed all imports, t-SNE computation, and callback logic run without errors
 - Confirmed the Dash app object constructs successfully
 
+### 5. Bug Fix — Lasso Selection Not Updating Bar Chart
+
+**Prompt:**
+> I selected points with lasso in the scatterplot view. But even after selection, I see "Showing overall mean (no valid selection)."
+
+**Root cause:** The initial implementation stored original row indices in Plotly's `customdata` property on each scatter trace. However, Dash/Plotly's `selectedData` callback did not include `customdata` in the returned point dictionaries — only `curveNumber`, `pointIndex`, `x`, `y`, and `text` were present.
+
+**Debugging:** Added a temporary debug print to log the raw `selectedData` points to the terminal, which confirmed `customdata` was absent.
+
+**Fix applied:**
+- Removed reliance on `customdata`
+- Precomputed a `class_indices` lookup table mapping each class (curve) to its original row indices in the dataset
+- In the callback, used `curveNumber` + `pointIndex` (always present in `selectedData`) to look up the correct original row index via `class_indices[curveNumber][pointIndex]`
+- Also moved the scatter figure creation inline (`figure=make_scatter_figure()` in `dcc.Graph`) instead of mutating the layout tree after construction
+
 ## How to Run
 
 ```bash
@@ -68,10 +83,10 @@ Then open http://127.0.0.1:8050 in a browser.
 
 ```
 csc696d-visual-analytics/
-├── .venv/                  # Python virtual environment
+├── .venv/                       # Python virtual environment
 ├── wine_dashboard/
-│   └── app.py              # Dash application
-├── docs/
-│   └── session-summary.md  # This file
+│   ├── app.py                   # Dash application
+│   └── docs/
+│       └── session-summary.md   # This file
 └── ...
 ```
