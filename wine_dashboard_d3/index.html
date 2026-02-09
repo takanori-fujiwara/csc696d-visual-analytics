@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wine Dashboard — D3.js</title>
+    <link rel="stylesheet" href="style/style.css" />
+  </head>
+  <body>
+    <header>
+      <h2>Wine Dataset — Interactive Visual Analysis</h2>
+      <p class="subtitle">
+        Hover for details. Use lasso to select points and update the bar chart.
+      </p>
+    </header>
+    <div id="container">
+      <div id="view_scatter"></div>
+      <div id="view_bar">
+        <p id="selection-info">Loading...</p>
+      </div>
+    </div>
+    <div id="tooltip"></div>
+    <script type="module" src="script/main.js"></script>
+  </body>
+</html>
