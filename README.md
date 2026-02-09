@@ -13,6 +13,7 @@ A D3.js scatterplot with canvas-based lasso selection and a Python WebSocket bac
 - **Data**: Wine dataset (t-SNE projection) and mtcars
 
 **How to run:**
+
 ```bash
 # Terminal 1: Start backend
 cd scatter_d3_from_tutorial/backend
@@ -22,6 +23,7 @@ python ws_server.py
 cd scatter_d3_from_tutorial
 python -m http.server 8080
 ```
+
 Then open http://localhost:8080.
 
 ---
@@ -34,21 +36,18 @@ An interactive wine dataset dashboard built with Plotly Dash, developed entirely
 - **Interactions**: Hover tooltips, lasso/box selection updating bar chart
 
 **How to run:**
+
 ```bash
 source .venv/bin/activate
 python wine_dashboard_dash_with_claude/app.py
 ```
+
 Then open http://127.0.0.1:8050.
 
 **Claude conversation logs:** [`wine_dashboard_dash_with_claude/docs/`](wine_dashboard_dash_with_claude/docs/)
+
 - `conversation-history.md` — Full conversation history with prompts and Claude's actions
 - `session-summary.md` — Technical summary of what was built
-
-## License
-
-This project is licensed under the [BSD 3-Clause License](LICENSE).
-
-Feel free to use these examples in lectures, courses, workshops, or any other context. If you do, I would appreciate it if you let me know how you utilize them.
 
 ---
 
@@ -61,6 +60,7 @@ The same wine dashboard recreated with a D3.js frontend and Python WebSocket bac
 - **Data**: Wine dataset (178 samples, 13 features, 3 classes)
 
 **How to run:**
+
 ```bash
 # Terminal 1: Start backend
 cd wine_dashboard_d3_with_claude/backend
@@ -70,8 +70,16 @@ python ws_server.py
 cd wine_dashboard_d3_with_claude
 python -m http.server 8080
 ```
+
 Then open http://localhost:8080.
 
 **Claude conversation logs:** [`wine_dashboard_d3_with_claude/docs/`](wine_dashboard_d3_with_claude/docs/)
+
 - `conversation-history.md` — Full conversation history with prompts and Claude's actions
 - `session-summary.md` — Technical summary of what was built
+
+## License
+
+This project is licensed under the [BSD 3-Clause License](LICENSE).
+
+Feel free to use these examples in lectures, courses, workshops, or any other context. If you do, I would appreciate it if you let me know how you utilize them.
