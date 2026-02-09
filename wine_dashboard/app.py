@@ -32,6 +32,10 @@ color_map = {0: "#1f77b4", 1: "#ff7f0e", 2: "#2ca02c"}
 # class_indices[i] gives the array of original row indices for class i
 class_indices = [np.where(y == cls)[0] for cls in range(len(class_names))]
 
+# Min-max normalization parameters (per attribute)
+X_min = X.min(axis=0)
+X_max = X.max(axis=0)
+
 def make_scatter_figure():
     fig = go.Figure()
     for cls_idx, cls_name in enumerate(class_names):
@@ -51,8 +55,9 @@ def make_scatter_figure():
         )
     fig.update_layout(
         dragmode="lasso",
-        xaxis=dict(title="t-SNE 1"),
-        yaxis=dict(title="t-SNE 2"),
+        plot_bgcolor="white",
+        xaxis=dict(title="t-SNE 1", gridcolor="#eee", zeroline=False),
+        yaxis=dict(title="t-SNE 2", gridcolor="#eee", zeroline=False),
         legend=dict(title="Class"),
         margin=dict(l=40, r=20, t=20, b=40),
     )
@@ -121,16 +126,20 @@ def update_bar_chart(selected_data):
         means = X[indices].mean(axis=0)
         info_text = f"Showing mean of {len(indices)} selected point(s)."
 
+    # Min-max normalize means to 0–1 range
+    means_normalized = (means - X_min) / (X_max - X_min)
+
     fig = go.Figure(
         go.Bar(
             x=list(feature_names),
-            y=means,
+            y=means_normalized,
             marker_color="#4a90d9",
         )
     )
     fig.update_layout(
-        xaxis=dict(title="Attribute", tickangle=-45),
-        yaxis=dict(title="Mean Value"),
+        plot_bgcolor="white",
+        xaxis=dict(title="Attribute", tickangle=-45, gridcolor="#eee"),
+        yaxis=dict(title="Normalized Mean Value", range=[0, 1], gridcolor="#eee"),
         margin=dict(l=50, r=20, t=20, b=120),
     )
     return fig, info_text

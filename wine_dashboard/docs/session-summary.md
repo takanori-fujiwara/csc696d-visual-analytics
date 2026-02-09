@@ -70,6 +70,17 @@ Build an interactive visual analysis interface using Dash (Plotly Dash) to explo
 - In the callback, used `curveNumber` + `pointIndex` (always present in `selectedData`) to look up the correct original row index via `class_indices[curveNumber][pointIndex]`
 - Also moved the scatter figure creation inline (`figure=make_scatter_figure()` in `dcc.Graph`) instead of mutating the layout tree after construction
 
+### 6. Visual Design Adjustments
+
+**Prompt:**
+> Now I want to adjust visual designs.
+> - Can you make the background of the plots white? If needed, change related figure designs as well.
+> - Can you make the y-axis of the bar chart view the min-max range of the entire dataset (i.e., each attribute's minimum value will be 0 and max value will be 1)?
+
+**Changes applied:**
+- **White plot backgrounds:** Both the scatterplot and bar chart now use `plot_bgcolor="white"` with light gray gridlines (`#eee`). Scatterplot axes also have `zeroline=False` to remove the default zero lines.
+- **Min-max normalized bar chart:** Precomputed per-attribute `X_min` and `X_max` from the full dataset. The bar chart callback now normalizes the mean values with `(mean - X_min) / (X_max - X_min)`, so each attribute is scaled to a 0–1 range. The y-axis is fixed to `[0, 1]` and labeled "Normalized Mean Value".
+
 ## How to Run
 
 ```bash
